@@ -431,6 +431,71 @@ body::before {
   .rule-row { grid-template-columns: 1fr; gap: 4px; }
   .rule-val { padding-left: 4px; }
 }
+
+/* REGISTER NAV BUTTON — destacado */
+.nav-btn.register-btn {
+  color: var(--neon-yellow);
+  border-bottom-color: rgba(255,230,0,0.4) !important;
+  font-weight: 700;
+}
+.nav-btn.register-btn.active {
+  border-bottom-color: var(--neon-yellow) !important;
+  text-shadow: 0 0 10px var(--neon-yellow);
+}
+
+/* CTA REGISTER BUTTON — botão grande de chamada à acção */
+.cta-register {
+  display: block;
+  width: 100%;
+  margin: 24px 0;
+  padding: 22px 20px;
+  background: linear-gradient(135deg, rgba(255,230,0,0.18) 0%, rgba(255,45,120,0.18) 100%);
+  border: 2px solid var(--neon-yellow);
+  border-radius: 14px;
+  color: var(--neon-yellow);
+  font-family: 'Audiowide', cursive;
+  font-size: 1.4rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  text-shadow: 0 0 15px rgba(255,230,0,0.7);
+  box-shadow: 0 0 25px rgba(255,230,0,0.25), inset 0 0 25px rgba(255,230,0,0.08);
+  animation: ctaPulse 2.2s ease-in-out infinite;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+.cta-register:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px rgba(255,230,0,0.5), inset 0 0 30px rgba(255,230,0,0.15);
+}
+.cta-register:active { transform: translateY(0); }
+.cta-register .cta-sub {
+  display: block;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  color: var(--text-main);
+  margin-top: 6px;
+  font-weight: 400;
+  text-shadow: none;
+  opacity: 0.9;
+}
+.cta-register .cta-arrow {
+  display: inline-block;
+  margin-left: 8px;
+  transition: transform 0.2s ease;
+}
+.cta-register:hover .cta-arrow { transform: translateX(6px); }
+@keyframes ctaPulse {
+  0%, 100% { box-shadow: 0 0 25px rgba(255,230,0,0.25), inset 0 0 25px rgba(255,230,0,0.08); }
+  50% { box-shadow: 0 0 45px rgba(255,230,0,0.55), inset 0 0 35px rgba(255,230,0,0.18); }
+}
+@media (max-width: 540px) {
+  .cta-register { font-size: 1.1rem; padding: 18px 14px; letter-spacing: 2px; }
+  .cta-register .cta-sub { font-size: 0.6rem; }
+}
 .program-time {
   font-family: 'Orbitron', monospace;
   font-size: 1.1rem;
@@ -924,7 +989,6 @@ body::before {
   const db = getDatabase(fbApp);
   window.fb = { db, ref, onValue, set, remove, push };
 
-  // Subscribe to results — atualização em tempo real para todos
   onValue(ref(db, 'results'), (snap) => {
     const data = snap.val() || {};
     window.RESULTS = data;
@@ -934,7 +998,6 @@ body::before {
     if (typeof renderAdminGames === 'function' && typeof adminLoggedIn !== 'undefined' && adminLoggedIn) renderAdminGames();
   }, (err) => console.warn('Firebase results read error:', err));
 
-  // Subscribe to registrations (backup, não exibido na UI)
   onValue(ref(db, 'registrations'), (snap) => {
     const data = snap.val() || {};
     window.REGISTRATIONS = Object.values(data);
@@ -983,7 +1046,7 @@ body::before {
   <button class="nav-btn" onclick="showPage('calendar')">📅 Calendário</button>
   <button class="nav-btn" onclick="showPage('standings')">🏆 Classificação</button>
   <button class="nav-btn" onclick="showPage('rules')">📜 Regulamento</button>
-  <button class="nav-btn" onclick="showPage('register')">✍️ Inscrição</button>
+  <button class="nav-btn register-btn" onclick="showPage('register')">✍️ Inscrição</button>
   <button class="nav-btn" onclick="showPage('qr')">📲 QR / Link</button>
   <button class="nav-btn admin-btn" onclick="showPage('admin')">⚙️ Back Office</button>
 </nav>
@@ -997,6 +1060,11 @@ body::before {
       O <strong style="color:var(--neon-cyan)">Padel Boom</strong> não é um torneio. É um fenómeno. Uma experiência imersiva inspirada nos anos 90, onde o jogo se mistura com música icónica, cores vibrantes e uma energia coletiva que transforma o clube num verdadeiro palco de festa.
     </p>
   </div>
+
+  <button class="cta-register" onclick="showPage('register')">
+    🎾 Inscreve a tua equipa<span class="cta-arrow">→</span>
+    <span class="cta-sub">Vagas limitadas · 16 equipas · 30 Maio 2026</span>
+  </button>
 
   <div class="section-title yellow" style="font-size:1.6rem;">PROGRAMAÇÃO</div>
   <div class="program-grid">
@@ -1655,10 +1723,8 @@ function submitRegistration() {
   REGISTRATIONS.push(reg);
   localStorage.setItem('pb_regs', JSON.stringify(REGISTRATIONS));
 
-  // Firebase backup
   if(window.fb) window.fb.push(window.fb.ref(window.fb.db, 'registrations'), reg);
 
-  // FormSubmit — email para info@thestage.pt
   const payload = {
     _subject: `🎾 Nova inscrição Padel Boom — ${teamName}`,
     _replyto: captainEmail,
