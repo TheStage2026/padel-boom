@@ -906,6 +906,41 @@ body::before {
   .game-card { grid-template-columns: 1fr auto 1fr; }
 }
 </style>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue, set, remove, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCTeXdUjEQsTUOEDtoF_MPZtXQeRpR6V3k",
+    authDomain: "padel-boom.firebaseapp.com",
+    databaseURL: "https://padel-boom-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "padel-boom",
+    storageBucket: "padel-boom.firebasestorage.app",
+    messagingSenderId: "449880235759",
+    appId: "1:449880235759:web:40b2595a1030508767051a"
+  };
+
+  const fbApp = initializeApp(firebaseConfig);
+  const db = getDatabase(fbApp);
+  window.fb = { db, ref, onValue, set, remove, push };
+
+  // Subscribe to results — atualização em tempo real para todos
+  onValue(ref(db, 'results'), (snap) => {
+    const data = snap.val() || {};
+    window.RESULTS = data;
+    try { localStorage.setItem('pb_results', JSON.stringify(data)); } catch(e){}
+    if (typeof renderStandings === 'function') renderStandings();
+    if (typeof renderCalendar === 'function') renderCalendar();
+    if (typeof renderAdminGames === 'function' && typeof adminLoggedIn !== 'undefined' && adminLoggedIn) renderAdminGames();
+  }, (err) => console.warn('Firebase results read error:', err));
+
+  // Subscribe to registrations (backup, não exibido na UI)
+  onValue(ref(db, 'registrations'), (snap) => {
+    const data = snap.val() || {};
+    window.REGISTRATIONS = Object.values(data);
+    try { localStorage.setItem('pb_regs', JSON.stringify(window.REGISTRATIONS)); } catch(e){}
+  }, (err) => console.warn('Firebase regs read error:', err));
+</script>
 </head>
 <body>
 <div class="app">
@@ -1087,7 +1122,6 @@ body::before {
     <div style="font-size:0.85rem;color:var(--text-dim);margin-top:8px;">16 Equipas · 96 Jogadores · Somatório de Pontos</div>
   </div>
 
-  <!-- FORMATO -->
   <div class="card" style="margin-bottom:16px;">
     <div style="font-family:'Orbitron',monospace;font-size:0.85rem;color:var(--neon-yellow);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;">🏆 Formato</div>
     <div class="rule-row"><div class="rule-key">Equipas</div><div class="rule-val">16 equipas de 6 jogadores (3 Homens + 3 Mulheres)</div></div>
@@ -1098,7 +1132,6 @@ body::before {
     <div class="rule-row"><div class="rule-key">Descanso</div><div class="rule-val">Máximo 1 ronda de descanso (30 min) entre jogos</div></div>
   </div>
 
-  <!-- CAMPOS E TIPOS DE JOGO -->
   <div class="card" style="margin-bottom:16px;">
     <div style="font-family:'Orbitron',monospace;font-size:0.85rem;color:var(--neon-cyan);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;">🏟️ Campos e Tipos de Jogo</div>
     <div class="rule-row"><div class="rule-key">Campo 1 — Dupla Mista</div><div class="rule-val">H3+M3 da Eq.A vs H3+M3 da Eq.B · Campo Duplo</div></div>
@@ -1109,7 +1142,6 @@ body::before {
     <div class="rule-row"><div class="rule-key">5 campos em simultâneo</div><div class="rule-val">Em cada ronda os 5 campos estão sempre activos ao mesmo tempo</div></div>
   </div>
 
-  <!-- PONTUAÇÃO -->
   <div class="card" style="margin-bottom:16px;">
     <div style="font-family:'Orbitron',monospace;font-size:0.85rem;color:var(--neon-pink);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;">🏅 Pontuação</div>
     <div class="rule-row"><div class="rule-key">Registo</div><div class="rule-val">Inserir o marcador real: Pontos A e Pontos B (ex: 21 e 15)</div></div>
@@ -1444,11 +1476,11 @@ const SCHEDULE_RAW = [
 ];
 
 // Results storage: key = "R1-Campo 1" => {ra: score, rb: score}
-let RESULTS = {};
+var RESULTS = {};
 try { RESULTS = JSON.parse(localStorage.getItem('pb_results') || '{}'); } catch(e){}
 
 // Registrations
-let REGISTRATIONS = [];
+var REGISTRATIONS = [];
 try { REGISTRATIONS = JSON.parse(localStorage.getItem('pb_regs') || '[]'); } catch(e){}
 
 const ROUNDS = [...new Set(SCHEDULE_RAW.map(g=>g.r))];
@@ -1623,7 +1655,10 @@ function submitRegistration() {
   REGISTRATIONS.push(reg);
   localStorage.setItem('pb_regs', JSON.stringify(REGISTRATIONS));
 
-  // Enviar notificação por email (FormSubmit) para info@thestage.pt
+  // Firebase backup
+  if(window.fb) window.fb.push(window.fb.ref(window.fb.db, 'registrations'), reg);
+
+  // FormSubmit — email para info@thestage.pt
   const payload = {
     _subject: `🎾 Nova inscrição Padel Boom — ${teamName}`,
     _replyto: captainEmail,
@@ -1634,12 +1669,8 @@ function submitRegistration() {
     Email_Capitao: captainEmail,
     Telemovel_Capitao: captainPhone,
     Modo_Pagamento: paymentMode === 'team' ? 'Equipa (180€)' : 'Individual (6 x 30€)',
-    Jogador_M1: m1,
-    Jogador_M2: m2,
-    Jogador_M3: m3,
-    Jogadora_F1: f1,
-    Jogadora_F2: f2,
-    Jogadora_F3: f3,
+    Jogador_M1: m1, Jogador_M2: m2, Jogador_M3: m3,
+    Jogadora_F1: f1, Jogadora_F2: f2, Jogadora_F3: f3,
     Data_Inscricao: new Date().toLocaleString('pt-PT')
   };
   fetch('https://formsubmit.co/ajax/info@thestage.pt', {
@@ -1730,9 +1761,12 @@ function saveRoundResults() {
     const ra = document.getElementById(`score-a-${key}`).value;
     const rb = document.getElementById(`score-b-${key}`).value;
     if(ra!=='' && rb!=='') {
-      RESULTS[key] = {ra:parseInt(ra), rb:parseInt(rb)};
+      const result = {ra:parseInt(ra), rb:parseInt(rb)};
+      RESULTS[key] = result;
+      if(window.fb) window.fb.set(window.fb.ref(window.fb.db, 'results/' + key), result);
     } else {
       delete RESULTS[key];
+      if(window.fb) window.fb.remove(window.fb.ref(window.fb.db, 'results/' + key));
     }
   });
   localStorage.setItem('pb_results', JSON.stringify(RESULTS));
@@ -1752,7 +1786,11 @@ function showClearMsg(text) {
 function clearRoundResults() {
   if(!confirm(`Tens a certeza que queres apagar TODOS os resultados da ronda ${adminActiveRound}?`)) return;
   const games = SCHEDULE_RAW.filter(g=>g.r===adminActiveRound);
-  games.forEach(g => { delete RESULTS[`${g.r}-${g.c}`]; });
+  games.forEach(g => {
+    const key = `${g.r}-${g.c}`;
+    delete RESULTS[key];
+    if(window.fb) window.fb.remove(window.fb.ref(window.fb.db, 'results/' + key));
+  });
   localStorage.setItem('pb_results', JSON.stringify(RESULTS));
   renderAdminGames();
   if(typeof renderStandings === 'function') renderStandings();
@@ -1764,6 +1802,7 @@ function clearAllResults() {
   if(!confirm('Apagar TODOS os resultados de TODAS as rondas? Esta ação é irreversível.')) return;
   RESULTS = {};
   localStorage.removeItem('pb_results');
+  if(window.fb) window.fb.remove(window.fb.ref(window.fb.db, 'results'));
   renderAdminGames();
   if(typeof renderStandings === 'function') renderStandings();
   if(typeof renderCalendar === 'function') renderCalendar();
@@ -1777,6 +1816,10 @@ function clearEverything() {
   REGISTRATIONS = [];
   localStorage.removeItem('pb_results');
   localStorage.removeItem('pb_regs');
+  if(window.fb) {
+    window.fb.remove(window.fb.ref(window.fb.db, 'results'));
+    window.fb.remove(window.fb.ref(window.fb.db, 'registrations'));
+  }
   renderAdminGames();
   if(typeof renderStandings === 'function') renderStandings();
   if(typeof renderCalendar === 'function') renderCalendar();
