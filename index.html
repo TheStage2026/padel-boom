@@ -81,6 +81,42 @@ body.light .game-team { color: #fff; }
 body.light .game-vs { color: #c4baff; }
 body.light .neon-divider { opacity: 0.5; }
 body.light .footer { color: #c4baff; border-top-color: rgba(255,255,255,0.08); }
+.powered-by {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.powered-by:hover { opacity: 1; }
+.powered-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.stage-logo-link {
+  display: inline-block;
+  color: var(--text-main);
+  transition: color 0.2s, transform 0.2s;
+}
+.stage-logo-link:hover {
+  color: var(--neon-cyan);
+  transform: scale(1.04);
+}
+.stage-logo-link svg {
+  width: 110px;
+  height: auto;
+  display: block;
+}
+body.light .stage-logo-link { color: #1a1a2e; }
+body.light .stage-logo-link:hover { color: #6c5ce7; }
+@media (max-width: 540px) {
+  .stage-logo-link svg { width: 90px; }
+}
 body.light .qr-url { color: #c4baff; }
 body.light .qr-input { background: var(--dark-card); border-color: rgba(0,229,255,0.3); color: #fff; }
 body.light .qr-share-btn { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); color: #c4baff; }
@@ -1076,7 +1112,7 @@ body::before {
 
 <div class="event-info-bar">
   <div><span>📅 </span><strong>30 de Maio 2026</strong></div>
-  <div><span>⏰ </span><strong>14h00 – 02h30</strong></div>
+  <div><span>⏰ </span><strong>14h00 – 02h00</strong></div>
   <div><span>📍 </span><strong>JET SET Padel Club</strong></div>
   <div><span>👥 </span><strong>96 Jogadores · 16 Equipas</strong></div>
 </div>
@@ -1141,7 +1177,7 @@ body::before {
       <div class="program-desc">Cerimónia de entrega de prémios</div>
     </div>
     <div class="program-item">
-      <div class="program-time">00:00–02:30</div>
+      <div class="program-time">00:00–02:00</div>
       <div class="program-label">Boom Party</div>
       <div class="program-desc">Festa até de madrugada 🕺</div>
     </div>
@@ -1245,7 +1281,7 @@ body::before {
   <div class="card" style="margin-bottom:16px;">
     <div style="font-family:'Orbitron',monospace;font-size:0.85rem;color:var(--neon-yellow);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;">🏆 Formato</div>
     <div class="rule-row"><div class="rule-key">Equipas</div><div class="rule-val">16 equipas de 6 jogadores (3 Homens + 3 Mulheres)</div></div>
-    <div class="rule-row"><div class="rule-key">Jogos</div><div class="rule-val">Cada equipa disputa 11 a 13 jogos ao longo do dia</div></div>
+    <div class="rule-row"><div class="rule-key">Jogos</div><div class="rule-val">Cada equipa disputa 13 jogos ao longo do dia</div></div>
     <div class="rule-row"><div class="rule-key">Sistema</div><div class="rule-val">Somatório de pontos — sem eliminatórias nem fases finais</div></div>
     <div class="rule-row"><div class="rule-key">Vencedor</div><div class="rule-val">A equipa com mais pontos de classificação no final ganha</div></div>
     <div class="rule-row"><div class="rule-key">Adversários</div><div class="rule-val">Definidos por sorteio — confrontos variados ao longo do dia</div></div>
@@ -1264,7 +1300,6 @@ body::before {
 
   <div class="card" style="margin-bottom:16px;">
     <div style="font-family:'Orbitron',monospace;font-size:0.85rem;color:var(--neon-pink);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;">🏅 Pontuação</div>
-    <div class="rule-row"><div class="rule-key">Registo</div><div class="rule-val">Inserir o marcador real: Pontos A e Pontos B (ex: 21 e 15)</div></div>
     <div class="rule-row"><div class="rule-key" style="color:var(--neon-cyan);">✅ Vitória</div><div class="rule-val">3 pontos de classificação — quem tiver mais pontos no marcador</div></div>
     <div class="rule-row"><div class="rule-key">🔵 Derrota</div><div class="rule-val">1 ponto de classificação</div></div>
     <div class="rule-row"><div class="rule-key" style="color:var(--neon-pink);">🚫 Desistência</div><div class="rule-val">0 pontos — equipa ausente ou que abandona (inserir 0 no marcador)</div></div>
@@ -1470,7 +1505,12 @@ body::before {
 
 <div class="footer">
   <strong>PADEL BOOM</strong> — An Epic Era. One Powerful Game.<br>
-  <span style="opacity:0.5;">Powered by The Stage On Court</span>
+  <div class="powered-by">
+    <span class="powered-label">Powered by</span>
+    <a href="https://thestage.pt" target="_blank" rel="noopener" class="stage-logo-link" aria-label="The Stage">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="180 145 465 265" preserveAspectRatio="xMidYMid meet"> <g id="surface1"> <path style=" stroke:none;fill-rule:nonzero;fill:currentColor;" d="M 279.5625 178.78125 L 246.707031 178.78125 L 246.707031 269.199219 L 224.585938 269.199219 L 224.585938 178.78125 L 191.726562 178.78125 L 191.726562 156.664062 L 279.5625 156.664062 Z M 279.5625 178.78125 "/> <path style=" stroke:none;fill-rule:nonzero;fill:currentColor;" d="M 387.851562 156.875 L 387.851562 269.199219 L 365.734375 269.199219 L 365.734375 234.363281 L 313.976562 234.363281 L 313.976562 269.199219 L 291.855469 269.199219 L 291.855469 156.875 L 313.976562 156.875 L 313.976562 212.242188 L 365.734375 212.242188 L 365.734375 156.875 Z M 387.851562 156.875 "/> <path style=" stroke:none;fill-rule:nonzero;fill:currentColor;" d="M 477.589844 247.078125 L 477.589844 269.195312 L 400.058594 269.195312 L 400.058594 156.875 L 473.9375 156.875 L 473.9375 178.996094 L 422.179688 178.996094 L 422.179688 212.144531 L 455.039062 212.144531 L 455.039062 234.265625 L 422.179688 234.265625 L 422.179688 247.078125 Z M 477.589844 247.078125 "/> <path style=" stroke:none;fill-rule:nonzero;fill:currentColor;" d="M 261.703125 366.722656 C 261.703125 386.980469 245.707031 398.070312 224.59375 398.070312 C 206.679688 398.070312 194.308594 390.820312 187.058594 380.582031 L 203.695312 367.148438 C 208.171875 373.546875 214.144531 378.238281 223.953125 378.238281 C 233.339844 378.238281 239.308594 373.546875 239.308594 367.148438 C 239.308594 359.46875 233.125 356.695312 222.886719 352.21875 L 217.34375 349.871094 C 201.132812 342.835938 190.472656 334.300781 190.472656 315.960938 C 190.472656 299.113281 203.265625 286.316406 223.316406 286.316406 C 235.898438 286.316406 245.496094 290.367188 252.53125 300.394531 L 236.539062 313.613281 C 232.910156 308.070312 229.074219 305.9375 223.316406 305.9375 C 216.703125 305.9375 212.4375 310.203125 212.4375 315.535156 C 212.4375 322.359375 216.703125 324.917969 226.300781 329.183594 L 231.84375 331.53125 C 251.039062 339.636719 261.703125 347.953125 261.703125 366.722656 "/> <path style=" stroke:none;fill-rule:nonzero;fill:currentColor;" d="M 350.359375 308.285156 L 317.726562 308.285156 L 317.726562 398.070312 L 295.761719 398.070312 L 295.761719 308.285156 L 263.128906 308.285156 L 263.128906 286.316406 L 350.359375 286.316406 Z M 350.359375 308.285156 "/> <path style=" stroke:none;fill-rule:nonzero;fill:currentColor;" d="M 420.226562 369.707031 L 404.445312 330.464844 L 397.832031 314.042969 L 375.652344 369.707031 C 381.625 374.609375 389.300781 377.597656 397.832031 377.597656 C 406.363281 377.597656 414.253906 374.609375 420.226562 369.707031 M 453.710938 398.070312 L 431.742188 398.070312 L 428.117188 389.113281 C 419.375 394.871094 408.921875 398.070312 397.832031 398.070312 C 386.742188 398.070312 376.292969 394.871094 367.761719 389.113281 L 364.136719 398.070312 L 342.171875 398.070312 L 386.957031 286.53125 L 408.921875 286.53125 Z M 453.710938 398.070312 "/> <path style=" stroke:none;fill-rule:nonzero;fill:currentColor;" d="M 552.675781 333.449219 L 552.675781 370.558594 C 543.078125 386.980469 524.949219 398.285156 504.476562 398.285156 C 473.550781 398.285156 448.601562 373.332031 448.601562 342.40625 C 448.601562 311.484375 473.550781 286.527344 504.476562 286.527344 C 518.125 286.527344 530.710938 291.4375 540.308594 299.753906 L 526.230469 314.894531 C 520.257812 310.203125 512.582031 307.429688 504.476562 307.429688 C 485.070312 307.429688 469.285156 323 469.285156 342.40625 C 469.285156 361.8125 485.070312 377.382812 504.476562 377.382812 C 514.925781 377.382812 524.523438 372.691406 530.921875 365.441406 L 530.921875 354.351562 L 508.742188 354.351562 L 508.742188 333.449219 Z M 552.675781 333.449219 "/> <path style=" stroke:none;fill-rule:nonzero;fill:currentColor;" d="M 642.433594 376.105469 L 642.433594 398.070312 L 565.441406 398.070312 L 565.441406 286.527344 L 638.808594 286.527344 L 638.808594 308.496094 L 587.410156 308.496094 L 587.410156 342.40625 L 620.042969 342.40625 L 620.042969 364.375 L 587.410156 364.375 L 587.410156 376.105469 Z M 642.433594 376.105469 "/> <path style=" stroke:none;fill-rule:nonzero;fill:currentColor;" d="M 473.9375 156.875 L 638.808594 286.53125 L 638.808594 308.496094 L 473.9375 178.996094 "/> </g> </svg>
+    </a>
+  </div>
 </div>
 
 </div><!-- .app -->
@@ -1611,7 +1651,6 @@ const SCHEDULE_RAW = [
   // R21
   {r:'R21',t:'22h50',c:'Campo 1',type:'Dupla Mista',a:'Equipa 2',b:'Equipa 3'},
   {r:'R21',t:'22h50',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 16',b:'Equipa 1'},
-  {r:'R21',t:'22h50',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 7',b:'Equipa 8'},
   {r:'R21',t:'22h50',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 4',b:'Equipa 6'},
   {r:'R21',t:'22h50',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 15',b:'Equipa 5'},
 ];
