@@ -314,23 +314,61 @@ body::before {
 .event-info-bar strong { color: var(--text-main); }
 
 /* NAV */
+.nav-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--nav-bg);
+  border-bottom: 2px solid rgba(0,245,255,0.25);
+}
+/* Indicador visual de scroll horizontal */
+.nav-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 2px;
+  width: 40px;
+  background: linear-gradient(to right, transparent 0%, var(--nav-bg) 80%);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+.nav-wrap.scrolled-end::after { opacity: 0; }
+/* Seta indicadora "→" piscante para mostrar que há mais */
+.nav-wrap::before {
+  content: '›';
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  font-size: 1.4rem;
+  color: var(--neon-cyan);
+  font-weight: bold;
+  text-shadow: 0 0 8px var(--neon-cyan);
+  pointer-events: none;
+  animation: scrollHint 1.6s ease-in-out infinite;
+  z-index: 2;
+}
+.nav-wrap.scrolled-end::before { display: none; }
+@keyframes scrollHint {
+  0%, 100% { transform: translateY(-50%) translateX(0); opacity: 0.5; }
+  50%      { transform: translateY(-50%) translateX(4px); opacity: 1; }
+}
+
 .nav {
   display: flex;
   gap: 2px;
   overflow-x: auto;
   scrollbar-width: none;
-  padding: 16px 16px 0;
-  background: var(--nav-bg);
-  border-bottom: 2px solid rgba(0,245,255,0.15);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  padding: 16px 30px 0 16px;
+  scroll-behavior: smooth;
 }
 .nav::-webkit-scrollbar { display:none; }
 
 .nav-btn {
   font-family: 'Orbitron', monospace;
-  font-size: 0.62rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -338,19 +376,26 @@ body::before {
   background: transparent;
   border: none;
   border-bottom: 3px solid transparent;
-  color: var(--text-dim);
+  color: var(--text-main);
+  opacity: 0.7;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s;
 }
-.nav-btn:hover { color: var(--neon-cyan); }
+.nav-btn:hover {
+  color: var(--neon-cyan);
+  opacity: 1;
+  background: rgba(0,245,255,0.06);
+}
 .nav-btn.active {
   color: var(--neon-cyan);
   border-bottom-color: var(--neon-cyan);
   text-shadow: 0 0 10px var(--neon-cyan);
+  opacity: 1;
 }
-.nav-btn.admin-btn { color: var(--neon-pink); margin-left: auto; }
-.nav-btn.admin-btn.active { border-bottom-color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); }
+.nav-btn.admin-btn { color: var(--neon-pink); opacity: 0.85; margin-left: auto; }
+.nav-btn.admin-btn:hover { color: var(--neon-pink); background: rgba(255,45,120,0.08); opacity: 1; }
+.nav-btn.admin-btn.active { border-bottom-color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); opacity: 1; }
 
 /* PAGES */
 .page { display: none; padding: 24px 16px 80px; max-width: 960px; margin: 0 auto; }
@@ -1051,7 +1096,8 @@ body::before {
 </div>
 
 <!-- NAV -->
-<nav class="nav">
+<div class="nav-wrap" id="navWrap">
+<nav class="nav" id="navBar">
   <button class="nav-btn active" onclick="showPage('program')">🏠 Evento</button>
   <button class="nav-btn cta-inline" onclick="showPage('register')">🎾 Inscrever</button>
   <button class="nav-btn" onclick="showPage('calendar')">📅 Calendário</button>
@@ -1060,6 +1106,7 @@ body::before {
   <button class="nav-btn" onclick="showPage('qr')">📲 QR / Link</button>
   <button class="nav-btn admin-btn" onclick="showPage('admin')">⚙️ Back Office</button>
 </nav>
+</div>
 
 <!-- PAGE: PROGRAM -->
 <div id="page-program" class="page active">
@@ -1582,6 +1629,21 @@ let activeRound = null;
 let adminLoggedIn = false;
 const ADMIN_PASS = 'boom2025';
 
+// ===================== NAV SCROLL INDICATOR =====================
+function setupNavScrollIndicator() {
+  const navBar = document.getElementById('navBar');
+  const navWrap = document.getElementById('navWrap');
+  if(!navBar || !navWrap) return;
+  function update() {
+    const reachedEnd = navBar.scrollLeft + navBar.clientWidth >= navBar.scrollWidth - 4;
+    const noOverflow = navBar.scrollWidth <= navBar.clientWidth + 2;
+    navWrap.classList.toggle('scrolled-end', reachedEnd || noOverflow);
+  }
+  navBar.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  setTimeout(update, 100);
+}
+
 // ===================== NAVIGATION =====================
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -2089,7 +2151,8 @@ function shareNative() {
 // ===================== INIT =====================
 window.addEventListener('load', () => {
   // Theme
-  const savedTheme = localStorage.getItem('pb_theme');
+  setupNavScrollIndicator();
+const savedTheme = localStorage.getItem('pb_theme');
   if(savedTheme === 'light') {
     document.body.classList.add('light');
     document.getElementById('themeLabel').textContent = 'LIGHT';
