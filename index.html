@@ -992,7 +992,27 @@ body::before {
     const data = snap.val() || {};
     window.REGISTRATIONS = Object.values(data);
     try { localStorage.setItem('pb_regs', JSON.stringify(window.REGISTRATIONS)); } catch(e){}
+    if (typeof renderTeamNamesEditor === 'function') renderTeamNamesEditor();
+    if (typeof renderRegistrationsList === 'function') renderRegistrationsList();
   }, (err) => console.warn('Firebase regs read error:', err));
+
+  onValue(ref(db, 'team_names'), (snap) => {
+    const data = snap.val() || {};
+    window.TEAM_NAMES = data;
+    try { localStorage.setItem('pb_team_names', JSON.stringify(data)); } catch(e){}
+    if (typeof renderStandings === 'function') renderStandings();
+    if (typeof renderCalendar === 'function') renderCalendar();
+    if (typeof renderAdminGames === 'function' && typeof adminLoggedIn !== 'undefined' && adminLoggedIn) renderAdminGames();
+    if (typeof renderTeamNamesEditor === 'function') renderTeamNamesEditor();
+    // Atualizar dropdown do filtro de equipas
+    const sel = document.getElementById('teamFilter');
+    if(sel && typeof getTeamName === 'function') {
+      Array.from(sel.options).forEach((o,i) => {
+        if(i === 0) return;
+        o.textContent = getTeamName(o.value);
+      });
+    }
+  }, (err) => console.warn('Firebase team_names read error:', err));
 </script>
 </head>
 <body>
@@ -1366,6 +1386,19 @@ body::before {
       <button onclick="adminLogout()" style="background:rgba(255,45,120,0.1);border:1px solid rgba(255,45,120,0.3);color:var(--neon-pink);padding:6px 12px;border-radius:4px;cursor:pointer;font-size:0.75rem;">Sair</button>
     </div>
 
+    <div style="margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid rgba(255,45,120,0.2);">
+      <div style="font-family:'Orbitron',monospace;font-size:0.7rem;color:var(--neon-yellow);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;">🏷️ Nomes das Equipas</div>
+      <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:14px;line-height:1.5;">
+        Os nomes definidos aqui aparecem no calendário, classificação e em todo o lado.<br>
+        <span style="color:var(--neon-cyan);">As inscrições recebidas são pré-preenchidas automaticamente</span> — basta editares se for preciso e clicar em Guardar.
+      </div>
+      <div id="teamNamesEditor" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;"></div>
+      <button onclick="saveTeamNames()" style="width:100%;background:linear-gradient(135deg,#ffe600 0%,#ff2d78 100%);color:#0a0a14;border:none;border-radius:8px;padding:12px;font-family:'Audiowide',cursive;letter-spacing:2px;font-size:0.85rem;cursor:pointer;font-weight:700;">💾 Guardar Nomes das Equipas</button>
+      <div id="teamNamesMsg" style="display:none;margin-top:10px;font-size:0.8rem;color:var(--neon-cyan);"></div>
+
+      <div id="registrationsList" style="margin-top:18px;padding-top:14px;border-top:1px dashed rgba(255,255,255,0.1);"></div>
+    </div>
+
     <div style="margin-bottom:16px;">
       <label style="font-size:0.7rem;color:var(--text-dim);display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:2px;">Selecionar Ronda</label>
       <div class="admin-round-select" id="adminRoundSelect"></div>
@@ -1398,6 +1431,14 @@ body::before {
 <script>
 // ===================== DATA =====================
 const TEAMS = Array.from({length:16}, (_,i) => `Equipa ${i+1}`);
+
+// Mapping de nomes personalizados para as equipas (Equipa 1 → "Os Padel Masters", etc.)
+var TEAM_NAMES = {};
+try { TEAM_NAMES = JSON.parse(localStorage.getItem('pb_team_names') || '{}'); } catch(e){}
+
+function getTeamName(id) {
+  return (window.TEAM_NAMES && window.TEAM_NAMES[id]) ? window.TEAM_NAMES[id] : id;
+}
 
 const SCHEDULE_RAW = [
   // R1
@@ -1563,7 +1604,7 @@ function initCalendar() {
   if(sel.options.length === 1) {
     TEAMS.forEach(t => {
       const o = document.createElement('option');
-      o.value = t; o.textContent = t;
+      o.value = t; o.textContent = getTeamName(t);
       sel.appendChild(o);
     });
   }
@@ -1615,13 +1656,13 @@ function renderCalendar() {
       }
       div.innerHTML = `
         <span class="field-badge field-${fieldNum}">${g.c}<br><small>${g.type.split(' ')[0]} ${g.type.split(' ')[1]||''}</small></span>
-        <div class="game-team">${g.a}</div>
+        <div class="game-team">${getTeamName(g.a)}</div>
         <div>
           <div class="game-result${raClass}">${ra !== ''?ra:'–'}</div>
           <div class="game-vs">VS</div>
           <div class="game-result${rbClass}">${rb !== ''?rb:'–'}</div>
         </div>
-        <div class="game-team">${g.b}</div>
+        <div class="game-team">${getTeamName(g.b)}</div>
         <div class="game-type">${g.type}</div>
       `;
       container.appendChild(div);
@@ -1656,7 +1697,7 @@ function renderStandings() {
     const posClass = i===0?'pos-1':'pos-n';
     return `<tr class="${rowClass}">
       <td><span class="pos-badge ${posClass}">${i+1}</span></td>
-      <td><strong>${t.name}</strong></td>
+      <td><strong>${getTeamName(t.name)}</strong></td>
       <td>${t.games}</td>
       <td>${t.wins}</td>
       <td>${t.losses}</td>
@@ -1747,6 +1788,7 @@ function adminLogin() {
   if(pass === ADMIN_PASS) {
     adminLoggedIn = true;
     document.getElementById('adminLoginBox').style.display = 'none';
+    setTimeout(() => { renderTeamNamesEditor(); renderRegistrationsList(); }, 100);
     document.getElementById('adminContent').classList.add('visible');
     initAdmin();
   } else {
@@ -1793,18 +1835,101 @@ function renderAdminGames() {
     div.innerHTML = `
       <div class="result-meta">${g.c} · ${g.type} · ${g.t}</div>
       <div class="teams-row" style="margin-top:10px;">
-        <div class="result-team-name">${g.a}</div>
+        <div class="result-team-name">${getTeamName(g.a)}</div>
         <div class="result-input-wrap">
           <input class="result-input" type="number" min="0" max="99" id="score-a-${key}" value="${res.ra!==undefined?res.ra:''}" placeholder="0">
           <div class="result-dash">–</div>
           <input class="result-input" type="number" min="0" max="99" id="score-b-${key}" value="${res.rb!==undefined?res.rb:''}" placeholder="0">
         </div>
-        <div class="result-team-name" style="text-align:right;">${g.b}</div>
+        <div class="result-team-name" style="text-align:right;">${getTeamName(g.b)}</div>
       </div>
     `;
     container.appendChild(div);
   });
   document.getElementById('saveMsg').style.display = 'none';
+}
+
+// ===================== TEAM NAMES EDITOR =====================
+function renderTeamNamesEditor() {
+  const container = document.getElementById('teamNamesEditor');
+  if(!container) return;
+  const regs = (window.REGISTRATIONS || []).slice();
+  // Ordenar por data de inscrição (mais antigas primeiro)
+  regs.sort((a,b) => new Date(a.date||0) - new Date(b.date||0));
+  container.innerHTML = '';
+  TEAMS.forEach((teamId, i) => {
+    const saved = (window.TEAM_NAMES && window.TEAM_NAMES[teamId]) || '';
+    const suggested = regs[i] ? regs[i].teamName : '';
+    const value = saved || suggested || '';
+    const isSuggestion = !saved && suggested;
+    const row = document.createElement('div');
+    row.style.cssText = 'display:grid;grid-template-columns:80px 1fr;gap:8px;align-items:center;';
+    row.innerHTML = `
+      <label style="font-family:'Orbitron',monospace;font-size:0.7rem;color:var(--text-dim);letter-spacing:1px;">${teamId}</label>
+      <input type="text" id="teamname-${i}" value="${value.replace(/"/g,'&quot;')}" placeholder="Nome da equipa..." 
+        style="background:rgba(255,255,255,0.04);border:1px solid ${isSuggestion?'rgba(0,200,224,0.4)':'rgba(255,255,255,0.1)'};color:var(--text-main);padding:8px 10px;border-radius:6px;font-size:0.85rem;font-family:'Exo 2',sans-serif;width:100%;box-sizing:border-box;" />
+    `;
+    container.appendChild(row);
+  });
+}
+
+function saveTeamNames() {
+  const newNames = {};
+  TEAMS.forEach((teamId, i) => {
+    const input = document.getElementById('teamname-' + i);
+    if(input) {
+      const val = input.value.trim();
+      if(val) newNames[teamId] = val;
+    }
+  });
+  window.TEAM_NAMES = newNames;
+  TEAM_NAMES = newNames;
+  localStorage.setItem('pb_team_names', JSON.stringify(newNames));
+  if(window.fb) {
+    if(Object.keys(newNames).length === 0) {
+      window.fb.remove(window.fb.ref(window.fb.db, 'team_names'));
+    } else {
+      window.fb.set(window.fb.ref(window.fb.db, 'team_names'), newNames);
+    }
+  }
+  const msg = document.getElementById('teamNamesMsg');
+  msg.textContent = '✅ Nomes guardados — atualizados em todos os dispositivos.';
+  msg.style.display = 'block';
+  setTimeout(()=>msg.style.display='none', 3000);
+  // Re-render UI pública e admin
+  if(typeof renderStandings === 'function') renderStandings();
+  if(typeof renderCalendar === 'function') renderCalendar();
+  if(typeof renderAdminGames === 'function') renderAdminGames();
+  // Atualizar dropdown do filtro de equipas no calendário
+  const sel = document.getElementById('teamFilter');
+  if(sel) {
+    Array.from(sel.options).forEach((o,i) => {
+      if(i === 0) return; // pular "Todas as equipas"
+      o.textContent = getTeamName(o.value);
+    });
+  }
+}
+
+function renderRegistrationsList() {
+  const container = document.getElementById('registrationsList');
+  if(!container) return;
+  const regs = (window.REGISTRATIONS || []).slice();
+  regs.sort((a,b) => new Date(a.date||0) - new Date(b.date||0));
+  if(regs.length === 0) {
+    container.innerHTML = `<div style="font-size:0.75rem;color:var(--text-dim);font-style:italic;">📥 Nenhuma inscrição recebida ainda.</div>`;
+    return;
+  }
+  let html = `<div style="font-family:'Orbitron',monospace;font-size:0.65rem;color:var(--neon-cyan);letter-spacing:2px;margin-bottom:10px;text-transform:uppercase;">📥 Inscrições recebidas (${regs.length})</div>`;
+  html += '<div style="display:flex;flex-direction:column;gap:6px;max-height:240px;overflow-y:auto;">';
+  regs.forEach((r, i) => {
+    const date = r.date ? new Date(r.date).toLocaleDateString('pt-PT') : '';
+    html += `<div style="background:rgba(255,255,255,0.03);padding:8px 10px;border-radius:6px;font-size:0.8rem;border-left:2px solid var(--neon-cyan);">
+      <strong style="color:var(--neon-cyan);">${i+1}.</strong> <strong>${r.teamName||'(sem nome)'}</strong>
+      <div style="color:var(--text-dim);font-size:0.72rem;margin-top:2px;">${r.captainName||''} · ${r.captainEmail||''} · ${date}</div>
+    </div>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
 }
 
 function saveRoundResults() {
@@ -1872,7 +1997,10 @@ function clearEverything() {
   if(window.fb) {
     window.fb.remove(window.fb.ref(window.fb.db, 'results'));
     window.fb.remove(window.fb.ref(window.fb.db, 'registrations'));
+    window.fb.remove(window.fb.ref(window.fb.db, 'team_names'));
   }
+  TEAM_NAMES = {};
+  localStorage.removeItem('pb_team_names');
   renderAdminGames();
   if(typeof renderStandings === 'function') renderStandings();
   if(typeof renderCalendar === 'function') renderCalendar();
