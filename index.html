@@ -1843,11 +1843,8 @@ function submitRegistration() {
 
   if(window.fb) window.fb.push(window.fb.ref(window.fb.db, 'registrations'), reg);
 
-  const payload = {
-    _subject: `🎾 Nova inscrição Padel Boom — ${teamName}`,
-    _replyto: captainEmail,
-    _template: 'table',
-    _captcha: 'false',
+  // === DADOS DA INSCRIÇÃO ===
+  const dadosInscricao = {
     Equipa: teamName,
     Capitao: captainName,
     Email_Capitao: captainEmail,
@@ -1857,11 +1854,32 @@ function submitRegistration() {
     Jogadora_F1: f1, Jogadora_F2: f2, Jogadora_F3: f3,
     Data_Inscricao: new Date().toLocaleString('pt-PT')
   };
-  fetch('https://formsubmit.co/ajax/7ee8fd1799578bcc880709c9d62cb879', {
+
+  // === WEB3FORMS (primário) ===
+  fetch('https://api.web3forms.com/submit', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify(payload)
-  }).catch(err => console.warn('Falha ao enviar email de notificação:', err));
+    body: JSON.stringify({
+      access_key: '0280d23c-8e43-40fd-ac7f-25ff639c7a8f',
+      subject: `🎾 Nova inscrição Padel Boom — ${teamName}`,
+      from_name: 'Padel Boom App',
+      replyto: captainEmail,
+      ...dadosInscricao
+    })
+  }).catch(err => console.warn('Web3Forms falhou:', err));
+
+  // === FORMSUBMIT (backup redundante) ===
+  fetch('https://formsubmit.co/ajax/info@thestage.pt', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({
+      _subject: `🎾 Nova inscrição Padel Boom — ${teamName}`,
+      _replyto: captainEmail,
+      _template: 'table',
+      _captcha: 'false',
+      ...dadosInscricao
+    })
+  }).catch(err => console.warn('FormSubmit falhou:', err));
 
   document.getElementById('registerForm').style.display = 'none';
   const sm = document.getElementById('successMsg');
