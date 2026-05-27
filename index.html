@@ -1069,6 +1069,12 @@ body::before {
     if (typeof renderAdminGames === 'function' && typeof adminLoggedIn !== 'undefined' && adminLoggedIn) renderAdminGames();
   }, (err) => console.warn('Firebase results read error:', err));
 
+  onValue(ref(db, 'song_requests'), (snap) => {
+    const data = snap.val() || {};
+    window.SONG_REQUESTS = Object.values(data);
+    if (typeof renderSongRequests === 'function') renderSongRequests();
+  }, (err) => console.warn('Firebase songs read error:', err));
+
   onValue(ref(db, 'registrations'), (snap) => {
     const data = snap.val() || {};
     window.REGISTRATIONS = Object.values(data);
@@ -1112,9 +1118,9 @@ body::before {
 
 <div class="event-info-bar">
   <div><span>📅 </span><strong>30 de Maio 2026</strong></div>
-  <div><span>⏰ </span><strong>14h00 – 02h00</strong></div>
+  <div><span>⏰ </span><strong>15h00 – 02h00</strong></div>
   <div><span>📍 </span><strong>JET SET Padel Club</strong></div>
-  <div><span>👥 </span><strong>96 Jogadores · 16 Equipas</strong></div>
+  <div><span>👥 </span><strong>48 Jogadores · 8 Equipas</strong></div>
 </div>
 
 <!-- COUNTDOWN -->
@@ -1138,6 +1144,7 @@ body::before {
   <button class="nav-btn cta-inline" onclick="showPage('register')">🎾 Inscrever</button>
   <button class="nav-btn" onclick="showPage('calendar')">📅 Calendário</button>
   <button class="nav-btn" onclick="showPage('standings')">🏆 Classificação</button>
+  <button class="nav-btn" onclick="showPage('music')">🎵 Pedir Música</button>
   <button class="nav-btn" onclick="showPage('rules')">📜 Regulamento</button>
   <button class="nav-btn" onclick="showPage('qr')">📲 QR / Link</button>
   <button class="nav-btn admin-btn" onclick="showPage('admin')">⚙️ Back Office</button>
@@ -1157,29 +1164,24 @@ body::before {
   <div class="section-title yellow" style="font-size:1.6rem;">PROGRAMAÇÃO</div>
   <div class="program-grid">
     <div class="program-item">
-      <div class="program-time">14:00–14:30</div>
+      <div class="program-time">14:30–15:00</div>
       <div class="program-label">Opening</div>
       <div class="program-desc">Check-in · Music</div>
     </div>
     <div class="program-item">
-      <div class="program-time">14:30–20:00</div>
-      <div class="program-label">Games & Music</div>
-      <div class="program-desc">Jogos + DJ</div>
+      <div class="program-time">15:00–20:00</div>
+      <div class="program-label">Games & DJ</div>
+      <div class="program-desc">Jogos + DJ ao vivo</div>
     </div>
     <div class="program-item">
-      <div class="program-time">20:00–23:30</div>
-      <div class="program-label">Games & Party</div>
-      <div class="program-desc">Jogos + Boom Party 🎉</div>
-    </div>
-    <div class="program-item">
-      <div class="program-time">23:30–00:00</div>
-      <div class="program-label">Prémios</div>
-      <div class="program-desc">Cerimónia de entrega de prémios</div>
-    </div>
-    <div class="program-item">
-      <div class="program-time">00:00–02:00</div>
+      <div class="program-time">20:00–02:00</div>
       <div class="program-label">Boom Party</div>
       <div class="program-desc">Festa até de madrugada 🕺</div>
+    </div>
+    <div class="program-item">
+      <div class="program-time">21:00</div>
+      <div class="program-label">Prémios</div>
+      <div class="program-desc">Cerimónia de entrega de prémios</div>
     </div>
   </div>
 
@@ -1187,14 +1189,14 @@ body::before {
   <div class="section-title pink" style="font-size:1.6rem;">FORMATO DO TORNEIO</div>
 
   <div class="info-grid">
-    <div class="info-box"><div class="val">21</div><div class="key">Rondas</div></div>
-    <div class="info-box"><div class="val">105</div><div class="key">Jogos</div></div>
-    <div class="info-box"><div class="val">16</div><div class="key">Equipas</div></div>
-    <div class="info-box"><div class="val">96</div><div class="key">Jogadores</div></div>
+    <div class="info-box"><div class="val">12</div><div class="key">Rondas</div></div>
+    <div class="info-box"><div class="val">60</div><div class="key">Jogos</div></div>
+    <div class="info-box"><div class="val">8</div><div class="key">Equipas</div></div>
+    <div class="info-box"><div class="val">48</div><div class="key">Jogadores</div></div>
     <div class="info-box"><div class="val">5</div><div class="key">Campos</div></div>
     <div class="info-box"><div class="val">25'</div><div class="key">Por jogo</div></div>
-    <div class="info-box"><div class="val">13</div><div class="key">Jogos/equipa</div></div>
-    <div class="info-box"><div class="val">9h</div><div class="key">Duração</div></div>
+    <div class="info-box"><div class="val">15</div><div class="key">Jogos/equipa</div></div>
+    <div class="info-box"><div class="val">5h</div><div class="key">Jogos</div></div>
   </div>
 
   <table class="fields-table card">
@@ -1275,13 +1277,13 @@ body::before {
 
   <div class="card" style="margin-bottom:16px;text-align:center;">
     <div style="font-family:'Orbitron',monospace;font-size:0.7rem;color:var(--neon-cyan);letter-spacing:3px;text-transform:uppercase;">Festa Anos 90</div>
-    <div style="font-size:0.85rem;color:var(--text-dim);margin-top:8px;">16 Equipas · 96 Jogadores · Somatório de Pontos</div>
+    <div style="font-size:0.85rem;color:var(--text-dim);margin-top:8px;">8 Equipas · 48 Jogadores · Somatório de Pontos</div>
   </div>
 
   <div class="card" style="margin-bottom:16px;">
     <div style="font-family:'Orbitron',monospace;font-size:0.85rem;color:var(--neon-yellow);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;">🏆 Formato</div>
-    <div class="rule-row"><div class="rule-key">Equipas</div><div class="rule-val">16 equipas de 6 jogadores (3 Homens + 3 Mulheres)</div></div>
-    <div class="rule-row"><div class="rule-key">Jogos</div><div class="rule-val">Cada equipa disputa 13 jogos ao longo do dia</div></div>
+    <div class="rule-row"><div class="rule-key">Equipas</div><div class="rule-val">8 equipas de 6 jogadores (3 Homens + 3 Mulheres)</div></div>
+    <div class="rule-row"><div class="rule-key">Jogos</div><div class="rule-val">Cada equipa disputa 15 jogos ao longo do dia</div></div>
     <div class="rule-row"><div class="rule-key">Sistema</div><div class="rule-val">Somatório de pontos — sem eliminatórias nem fases finais</div></div>
     <div class="rule-row"><div class="rule-key">Vencedor</div><div class="rule-val">A equipa com mais pontos de classificação no final ganha</div></div>
     <div class="rule-row"><div class="rule-key">Adversários</div><div class="rule-val">Definidos por sorteio — confrontos variados ao longo do dia</div></div>
@@ -1413,6 +1415,32 @@ body::before {
 </div>
 
 
+<!-- PAGE: MÚSICA / PEDIR AO DJ -->
+<div id="page-music" class="page">
+  <div class="section-title cyan">PEDIR MÚSICA AO DJ</div>
+  <div class="card">
+    <p style="font-size:0.9rem;color:var(--text-dim);margin-bottom:16px;">🎧 Pede a tua música ao DJ! Os pedidos aparecem aqui em tempo real e o DJ vê-os ao longo do dia.</p>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>Música *</label>
+      <input type="text" id="songName" placeholder="Nome da música" />
+    </div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>Artista</label>
+      <input type="text" id="songArtist" placeholder="(opcional)" />
+    </div>
+    <div class="form-group" style="margin-bottom:16px;">
+      <label>O teu nome</label>
+      <input type="text" id="songRequester" placeholder="(opcional)" />
+    </div>
+    <button class="submit-btn" onclick="submitSongRequest()">🎵 Pedir Música</button>
+    <div id="songMsg" style="display:none;margin-top:12px;font-size:0.85rem;color:var(--neon-cyan);text-align:center;">✅ Pedido enviado ao DJ!</div>
+  </div>
+  <div class="card" style="margin-top:16px;">
+    <div style="font-family:'Orbitron',monospace;font-size:0.7rem;color:var(--neon-cyan);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;">🎶 Pedidos Recentes</div>
+    <div id="songList"></div>
+  </div>
+</div>
+
 <!-- PAGE: QR CODE -->
 <div id="page-qr" class="page">
   <div class="section-title cyan">PARTILHAR APP</div>
@@ -1485,6 +1513,7 @@ body::before {
       <div style="display:flex;flex-direction:column;gap:8px;">
         <button onclick="clearRoundResults()" style="background:rgba(255,45,120,0.1);border:1px solid rgba(255,45,120,0.4);color:var(--neon-pink);padding:10px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-family:inherit;">🧹 Limpar Resultados desta Ronda</button>
         <button onclick="clearAllResults()" style="background:rgba(255,45,120,0.15);border:1px solid rgba(255,45,120,0.5);color:var(--neon-pink);padding:10px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-family:inherit;">🗑️ Limpar TODOS os Resultados</button>
+        <button onclick="clearSongRequests()" style="background:rgba(0,245,255,0.1);border:1px solid rgba(0,245,255,0.4);color:var(--neon-cyan);padding:10px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-family:inherit;">🎵 Limpar Pedidos de Música</button>
         <button onclick="clearEverything()" style="background:rgba(255,45,120,0.2);border:1px solid var(--neon-pink);color:var(--neon-pink);padding:10px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-family:inherit;font-weight:bold;">⚠️ RESET TOTAL (Resultados + Inscrições)</button>
       </div>
       <div id="clearMsg" style="display:none;margin-top:10px;font-size:0.8rem;color:var(--neon-cyan);"></div>
@@ -1506,7 +1535,7 @@ body::before {
 
 <script>
 // ===================== DATA =====================
-const TEAMS = Array.from({length:16}, (_,i) => `Equipa ${i+1}`);
+const TEAMS = Array.from({length:8}, (_,i) => `Equipa ${i+1}`);
 
 // Mapping de nomes personalizados para as equipas (Equipa 1 → "Os Padel Masters", etc.)
 var TEAM_NAMES = {};
@@ -1518,130 +1547,77 @@ function getTeamName(id) {
 
 const SCHEDULE_RAW = [
   // R1
-  {r:'R1',t:'14h30',c:'Campo 1',type:'Dupla Mista',a:'Equipa 8',b:'Equipa 4'},
-  {r:'R1',t:'14h30',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 3',b:'Equipa 9'},
-  {r:'R1',t:'14h30',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 6',b:'Equipa 7'},
-  {r:'R1',t:'14h30',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 10',b:'Equipa 5'},
-  {r:'R1',t:'14h30',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 1',b:'Equipa 2'},
+  {r:'R1',t:'15h00',c:'Campo 1',type:'Dupla Mista',a:'Equipa 7',b:'Equipa 1'},
+  {r:'R1',t:'15h00',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 3',b:'Equipa 8'},
+  {r:'R1',t:'15h00',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 4',b:'Equipa 6'},
+  {r:'R1',t:'15h00',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 2',b:'Equipa 5'},
+  {r:'R1',t:'15h00',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 4',b:'Equipa 8'},
   // R2
-  {r:'R2',t:'14h55',c:'Campo 1',type:'Dupla Mista',a:'Equipa 13',b:'Equipa 11'},
-  {r:'R2',t:'14h55',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 14',b:'Equipa 12'},
-  {r:'R2',t:'14h55',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 15',b:'Equipa 8'},
-  {r:'R2',t:'14h55',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 9',b:'Equipa 16'},
-  {r:'R2',t:'14h55',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 10',b:'Equipa 7'},
+  {r:'R2',t:'15h25',c:'Campo 1',type:'Dupla Mista',a:'Equipa 5',b:'Equipa 3'},
+  {r:'R2',t:'15h25',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 7',b:'Equipa 6'},
+  {r:'R2',t:'15h25',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 1',b:'Equipa 2'},
+  {r:'R2',t:'15h25',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 4',b:'Equipa 7'},
+  {r:'R2',t:'15h25',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 1',b:'Equipa 8'},
   // R3
-  {r:'R3',t:'15h20',c:'Campo 1',type:'Dupla Mista',a:'Equipa 12',b:'Equipa 6'},
-  {r:'R3',t:'15h20',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 1',b:'Equipa 3'},
-  {r:'R3',t:'15h20',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 5',b:'Equipa 14'},
-  {r:'R3',t:'15h20',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 2',b:'Equipa 11'},
-  {r:'R3',t:'15h20',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 4',b:'Equipa 13'},
+  {r:'R3',t:'15h50',c:'Campo 1',type:'Dupla Mista',a:'Equipa 2',b:'Equipa 6'},
+  {r:'R3',t:'15h50',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 5',b:'Equipa 1'},
+  {r:'R3',t:'15h50',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 3',b:'Equipa 7'},
+  {r:'R3',t:'15h50',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 6',b:'Equipa 8'},
+  {r:'R3',t:'15h50',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 5',b:'Equipa 4'},
   // R4
-  {r:'R4',t:'15h45',c:'Campo 1',type:'Dupla Mista',a:'Equipa 9',b:'Equipa 8'},
-  {r:'R4',t:'15h45',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 13',b:'Equipa 16'},
-  {r:'R4',t:'15h45',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 14',b:'Equipa 7'},
-  {r:'R4',t:'15h45',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 15',b:'Equipa 12'},
-  {r:'R4',t:'15h45',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 11',b:'Equipa 10'},
+  {r:'R4',t:'16h15',c:'Campo 1',type:'Dupla Mista',a:'Equipa 4',b:'Equipa 3'},
+  {r:'R4',t:'16h15',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 2',b:'Equipa 7'},
+  {r:'R4',t:'16h15',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 8',b:'Equipa 5'},
+  {r:'R4',t:'16h15',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 3',b:'Equipa 1'},
+  {r:'R4',t:'16h15',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 6',b:'Equipa 2'},
   // R5
-  {r:'R5',t:'16h10',c:'Campo 1',type:'Dupla Mista',a:'Equipa 8',b:'Equipa 15'},
-  {r:'R5',t:'16h10',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 16',b:'Equipa 4'},
-  {r:'R5',t:'16h10',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 1',b:'Equipa 3'},
-  {r:'R5',t:'16h10',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 5',b:'Equipa 7'},
-  {r:'R5',t:'16h10',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 6',b:'Equipa 2'},
+  {r:'R5',t:'16h40',c:'Campo 1',type:'Dupla Mista',a:'Equipa 8',b:'Equipa 7'},
+  {r:'R5',t:'16h40',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 4',b:'Equipa 2'},
+  {r:'R5',t:'16h40',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 6',b:'Equipa 5'},
+  {r:'R5',t:'16h40',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 1',b:'Equipa 3'},
+  {r:'R5',t:'16h40',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 3',b:'Equipa 5'},
   // R6
-  {r:'R6',t:'16h35',c:'Campo 1',type:'Dupla Mista',a:'Equipa 6',b:'Equipa 16'},
-  {r:'R6',t:'16h35',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 13',b:'Equipa 14'},
-  {r:'R6',t:'16h35',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 9',b:'Equipa 11'},
-  {r:'R6',t:'16h35',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 5',b:'Equipa 12'},
-  {r:'R6',t:'16h35',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 15',b:'Equipa 10'},
+  {r:'R6',t:'17h05',c:'Campo 1',type:'Dupla Mista',a:'Equipa 2',b:'Equipa 8'},
+  {r:'R6',t:'17h05',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 1',b:'Equipa 4'},
+  {r:'R6',t:'17h05',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 7',b:'Equipa 5'},
+  {r:'R6',t:'17h05',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 6',b:'Equipa 3'},
+  {r:'R6',t:'17h05',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 2',b:'Equipa 4'},
   // R7
-  {r:'R7',t:'17h00',c:'Campo 1',type:'Dupla Mista',a:'Equipa 6',b:'Equipa 8'},
-  {r:'R7',t:'17h00',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 5',b:'Equipa 10'},
-  {r:'R7',t:'17h00',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 9',b:'Equipa 3'},
-  {r:'R7',t:'17h00',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 7',b:'Equipa 4'},
-  {r:'R7',t:'17h00',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 1',b:'Equipa 2'},
+  {r:'R7',t:'17h30',c:'Campo 1',type:'Dupla Mista',a:'Equipa 1',b:'Equipa 6'},
+  {r:'R7',t:'17h30',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 8',b:'Equipa 3'},
+  {r:'R7',t:'17h30',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 4',b:'Equipa 8'},
+  {r:'R7',t:'17h30',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 7',b:'Equipa 2'},
+  {r:'R7',t:'17h30',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 7',b:'Equipa 5'},
   // R8
-  {r:'R8',t:'17h25',c:'Campo 1',type:'Dupla Mista',a:'Equipa 16',b:'Equipa 13'},
-  {r:'R8',t:'17h25',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 1',b:'Equipa 4'},
-  {r:'R8',t:'17h25',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 2',b:'Equipa 14'},
-  {r:'R8',t:'17h25',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 15',b:'Equipa 11'},
-  {r:'R8',t:'17h25',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 3',b:'Equipa 12'},
+  {r:'R8',t:'17h55',c:'Campo 1',type:'Dupla Mista',a:'Equipa 4',b:'Equipa 5'},
+  {r:'R8',t:'17h55',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 6',b:'Equipa 1'},
+  {r:'R8',t:'17h55',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 2',b:'Equipa 3'},
+  {r:'R8',t:'17h55',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 8',b:'Equipa 7'},
+  {r:'R8',t:'17h55',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 1',b:'Equipa 6'},
   // R9
-  {r:'R9',t:'17h50',c:'Campo 1',type:'Dupla Mista',a:'Equipa 7',b:'Equipa 1'},
-  {r:'R9',t:'17h50',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 5',b:'Equipa 9'},
-  {r:'R9',t:'17h50',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 6',b:'Equipa 8'},
-  {r:'R9',t:'17h50',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 10',b:'Equipa 4'},
-  {r:'R9',t:'17h50',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 3',b:'Equipa 2'},
+  {r:'R9',t:'18h20',c:'Campo 1',type:'Dupla Mista',a:'Equipa 5',b:'Equipa 6'},
+  {r:'R9',t:'18h20',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 2',b:'Equipa 8'},
+  {r:'R9',t:'18h20',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 1',b:'Equipa 4'},
+  {r:'R9',t:'18h20',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 6',b:'Equipa 7'},
+  {r:'R9',t:'18h20',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 3',b:'Equipa 7'},
   // R10
-  {r:'R10',t:'18h15',c:'Campo 1',type:'Dupla Mista',a:'Equipa 12',b:'Equipa 7'},
-  {r:'R10',t:'18h15',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 15',b:'Equipa 9'},
-  {r:'R10',t:'18h15',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 14',b:'Equipa 8'},
-  {r:'R10',t:'18h15',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 10',b:'Equipa 13'},
-  {r:'R10',t:'18h15',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 16',b:'Equipa 11'},
+  {r:'R10',t:'18h45',c:'Campo 1',type:'Dupla Mista',a:'Equipa 4',b:'Equipa 3'},
+  {r:'R10',t:'18h45',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 5',b:'Equipa 8'},
+  {r:'R10',t:'18h45',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 1',b:'Equipa 2'},
+  {r:'R10',t:'18h45',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 4',b:'Equipa 6'},
+  {r:'R10',t:'18h45',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 7',b:'Equipa 8'},
   // R11
-  {r:'R11',t:'18h40',c:'Campo 1',type:'Dupla Mista',a:'Equipa 3',b:'Equipa 2'},
-  {r:'R11',t:'18h40',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 1',b:'Equipa 5'},
-  {r:'R11',t:'18h40',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 11',b:'Equipa 12'},
-  {r:'R11',t:'18h40',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 13',b:'Equipa 14'},
-  {r:'R11',t:'18h40',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 6',b:'Equipa 4'},
+  {r:'R11',t:'19h10',c:'Campo 1',type:'Dupla Mista',a:'Equipa 1',b:'Equipa 7'},
+  {r:'R11',t:'19h10',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 5',b:'Equipa 2'},
+  {r:'R11',t:'19h10',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 3',b:'Equipa 6'},
+  {r:'R11',t:'19h10',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 5',b:'Equipa 4'},
+  {r:'R11',t:'19h10',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 3',b:'Equipa 8'},
   // R12
-  {r:'R12',t:'19h05',c:'Campo 1',type:'Dupla Mista',a:'Equipa 7',b:'Equipa 16'},
-  {r:'R12',t:'19h05',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 15',b:'Equipa 10'},
-  {r:'R12',t:'19h05',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 8',b:'Equipa 9'},
-  {r:'R12',t:'19h05',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 11',b:'Equipa 12'},
-  {r:'R12',t:'19h05',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 13',b:'Equipa 14'},
-  // R13
-  {r:'R13',t:'19h30',c:'Campo 1',type:'Dupla Mista',a:'Equipa 4',b:'Equipa 5'},
-  {r:'R13',t:'19h30',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 8',b:'Equipa 2'},
-  {r:'R13',t:'19h30',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 6',b:'Equipa 15'},
-  {r:'R13',t:'19h30',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 1',b:'Equipa 16'},
-  {r:'R13',t:'19h30',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 7',b:'Equipa 3'},
-  // R14
-  {r:'R14',t:'19h55',c:'Campo 1',type:'Dupla Mista',a:'Equipa 6',b:'Equipa 16'},
-  {r:'R14',t:'19h55',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 11',b:'Equipa 14'},
-  {r:'R14',t:'19h55',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 9',b:'Equipa 12'},
-  {r:'R14',t:'19h55',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 13',b:'Equipa 5'},
-  {r:'R14',t:'19h55',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 15',b:'Equipa 10'},
-  // R15
-  {r:'R15',t:'20h20',c:'Campo 1',type:'Dupla Mista',a:'Equipa 4',b:'Equipa 8'},
-  {r:'R15',t:'20h20',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 10',b:'Equipa 1'},
-  {r:'R15',t:'20h20',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 3',b:'Equipa 6'},
-  {r:'R15',t:'20h20',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 7',b:'Equipa 5'},
-  {r:'R15',t:'20h20',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 9',b:'Equipa 2'},
-  // R16
-  {r:'R16',t:'20h45',c:'Campo 1',type:'Dupla Mista',a:'Equipa 13',b:'Equipa 2'},
-  {r:'R16',t:'20h45',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 12',b:'Equipa 15'},
-  {r:'R16',t:'20h45',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 1',b:'Equipa 4'},
-  {r:'R16',t:'20h45',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 11',b:'Equipa 16'},
-  {r:'R16',t:'20h45',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 3',b:'Equipa 14'},
-  // R17
-  {r:'R17',t:'21h10',c:'Campo 1',type:'Dupla Mista',a:'Equipa 8',b:'Equipa 10'},
-  {r:'R17',t:'21h10',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 6',b:'Equipa 1'},
-  {r:'R17',t:'21h10',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 7',b:'Equipa 3'},
-  {r:'R17',t:'21h10',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 2',b:'Equipa 4'},
-  {r:'R17',t:'21h10',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 9',b:'Equipa 5'},
-  // R18
-  {r:'R18',t:'21h35',c:'Campo 1',type:'Dupla Mista',a:'Equipa 12',b:'Equipa 11'},
-  {r:'R18',t:'21h35',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 13',b:'Equipa 8'},
-  {r:'R18',t:'21h35',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 7',b:'Equipa 10'},
-  {r:'R18',t:'21h35',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 14',b:'Equipa 15'},
-  {r:'R18',t:'21h35',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 16',b:'Equipa 9'},
-  // R19
-  {r:'R19',t:'22h00',c:'Campo 1',type:'Dupla Mista',a:'Equipa 1',b:'Equipa 4'},
-  {r:'R19',t:'22h00',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 3',b:'Equipa 6'},
-  {r:'R19',t:'22h00',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 13',b:'Equipa 5'},
-  {r:'R19',t:'22h00',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 11',b:'Equipa 14'},
-  {r:'R19',t:'22h00',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 12',b:'Equipa 2'},
-  // R20
-  {r:'R20',t:'22h25',c:'Campo 1',type:'Dupla Mista',a:'Equipa 11',b:'Equipa 16'},
-  {r:'R20',t:'22h25',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 7',b:'Equipa 15'},
-  {r:'R20',t:'22h25',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 13',b:'Equipa 10'},
-  {r:'R20',t:'22h25',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 9',b:'Equipa 12'},
-  {r:'R20',t:'22h25',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 14',b:'Equipa 8'},
-  // R21
-  {r:'R21',t:'22h50',c:'Campo 1',type:'Dupla Mista',a:'Equipa 2',b:'Equipa 3'},
-  {r:'R21',t:'22h50',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 16',b:'Equipa 1'},
-  {r:'R21',t:'22h50',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 4',b:'Equipa 6'},
-  {r:'R21',t:'22h50',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 15',b:'Equipa 5'},
+  {r:'R12',t:'19h35',c:'Campo 1',type:'Dupla Mista',a:'Equipa 2',b:'Equipa 3'},
+  {r:'R12',t:'19h35',c:'Campo 2',type:'Dupla Masculina',a:'Equipa 6',b:'Equipa 8'},
+  {r:'R12',t:'19h35',c:'Campo 3',type:'Dupla Feminina',a:'Equipa 7',b:'Equipa 4'},
+  {r:'R12',t:'19h35',c:'Campo 4',type:'1v1 Masculino',a:'Equipa 1',b:'Equipa 5'},
+  {r:'R12',t:'19h35',c:'Campo 5',type:'1v1 Feminino',a:'Equipa 2',b:'Equipa 1'},
 ];
 
 // Results storage: key = "R1-Campo 1" => {ra: score, rb: score}
@@ -1683,8 +1659,44 @@ function showPage(id) {
   if(id==='calendar') initCalendar();
   if(id==='standings') renderStandings();
   if(id==='qr') setTimeout(()=>renderQR(currentQrUrl), 100);
+  if(id==='music' && typeof renderSongRequests==='function') renderSongRequests();
   // scroll para o topo ao mudar de página (UX melhor com FAB)
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===================== PEDIR MÚSICA AO DJ =====================
+function escHtmlSong(s){ return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function submitSongRequest() {
+  const song=document.getElementById('songName').value.trim();
+  const artist=document.getElementById('songArtist').value.trim();
+  const requester=document.getElementById('songRequester').value.trim();
+  if(!song){ alert('Escreve o nome da música 🎵'); return; }
+  const req={ song, artist, requester, date:new Date().toISOString() };
+  if(window.fb) window.fb.push(window.fb.ref(window.fb.db,'song_requests'), req);
+  document.getElementById('songName').value='';
+  document.getElementById('songArtist').value='';
+  document.getElementById('songRequester').value='';
+  const msg=document.getElementById('songMsg'); msg.style.display='block';
+  setTimeout(()=>msg.style.display='none',3000);
+}
+function renderSongRequests() {
+  const c=document.getElementById('songList'); if(!c) return;
+  const reqs=(window.SONG_REQUESTS||[]).slice();
+  reqs.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+  if(!reqs.length){ c.innerHTML='<div style="font-size:0.85rem;color:var(--text-dim);font-style:italic;text-align:center;padding:20px;">Ainda não há pedidos. Sê o primeiro! 🎧</div>'; return; }
+  c.innerHTML='<div style="font-size:0.7rem;color:var(--text-dim);margin-bottom:10px;">'+reqs.length+' pedido(s)</div>'+reqs.map(r=>{
+    const t=r.date?new Date(r.date).toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'}):'';
+    return '<div style="background:rgba(0,245,255,0.05);border-left:3px solid var(--neon-cyan);padding:10px 12px;border-radius:6px;margin-bottom:8px;">'+
+      '<div style="font-weight:700;color:var(--text-main);">🎵 '+escHtmlSong(r.song)+(r.artist?' <span style="color:var(--text-dim);font-weight:400;">— '+escHtmlSong(r.artist)+'</span>':'')+'</div>'+
+      '<div style="font-size:0.72rem;color:var(--text-dim);margin-top:2px;">'+(r.requester?'por '+escHtmlSong(r.requester)+' · ':'')+t+'</div></div>';
+  }).join('');
+}
+function clearSongRequests() {
+  if(!confirm('Apagar todos os pedidos de música?')) return;
+  window.SONG_REQUESTS=[];
+  if(window.fb) window.fb.remove(window.fb.ref(window.fb.db,'song_requests'));
+  renderSongRequests();
+  if(typeof showClearMsg==='function') showClearMsg('✅ Pedidos de música apagados.');
 }
 
 // ===================== CALENDAR =====================
@@ -2106,6 +2118,7 @@ function clearEverything() {
     window.fb.remove(window.fb.ref(window.fb.db, 'results'));
     window.fb.remove(window.fb.ref(window.fb.db, 'registrations'));
     window.fb.remove(window.fb.ref(window.fb.db, 'team_names'));
+    window.fb.remove(window.fb.ref(window.fb.db, 'song_requests'));
   }
   TEAM_NAMES = {};
   localStorage.removeItem('pb_team_names');
@@ -2124,7 +2137,7 @@ function toggleTheme() {
 }
 
 // ===================== COUNTDOWN =====================
-const EVENT_DATE = new Date('2026-05-30T14:00:00');
+const EVENT_DATE = new Date('2026-05-30T15:00:00');
 function updateCountdown() {
   const now = new Date();
   const diff = EVENT_DATE - now;
